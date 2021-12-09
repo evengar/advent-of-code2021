@@ -14,7 +14,7 @@ invrow_decrease <- t(apply(testmat, 1, diff)) < 0
 
 
 
-topo <- matrix(FALSE, nrow = nrow(testmat), ncol = ncol(testmat))
+
 
 testmat[1,1] < testmat[c(1,2),c(1,2)]
 result <- testmat[1:2,1:2] == min(testmat[list(c(1,2), c(2,1))])
@@ -41,11 +41,39 @@ getAdjacent <- function(mat, row, col){
   return(vals)
 }
 
-topo[1:2, 2:3] <- topo[1:2, 2:3] & result
+testmat[1,1] < getAdjacent(testmat, 1, 1)
 
+testmat[1,2] < getAdjacent(testmat, 1, 2)
+
+topo <- matrix(FALSE, nrow = nrow(testmat), ncol = ncol(testmat))
 
 for (i in 1:nrow(testmat)){
   for (j in 1:ncol(testmat)){
-    
+    smallest <- all(testmat[i,j] < getAdjacent(testmat, i, j))
+    if (smallest){
+      topo[i, j] <- TRUE
+    }
   }
 }
+
+sum(1 + testmat[topo])
+
+findLowest <- function(mat){
+  topo <- matrix(FALSE, nrow = nrow(mat), ncol = ncol(mat))
+  
+  for (i in 1:nrow(mat)){
+    for (j in 1:ncol(mat)){
+      smallest <- all(mat[i,j] < getAdjacent(mat, i, j))
+      if (smallest){
+        topo[i, j] <- TRUE
+      }
+    }
+  }
+  return(topo)
+}
+
+# with data
+d <- readLines("data/09-input.txt")
+input_mat <- apply(str_split(d, "", simplify = TRUE), 2, as.numeric)
+
+sum(1 + input_mat[findLowest(input_mat)])
