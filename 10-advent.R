@@ -119,4 +119,68 @@ sum(scores[errors])
 
 d_incomplete <- d[errors == "ok"]
 
+reverseBracket <- function(char){
+  opening_braces <- c("(", "[", "{", "<")
+  closing_braces <- c(")", "]", "}", ">")
+  
+  if (any(char %in% opening_braces)){
+    return(closing_braces[char == opening_braces])
+  }else{
+    return(opening_braces[char == closing_braces])
+  }
+  
+}
 
+findIncomplete <- function(charvec){
+  
+  opening_braces <- c("(", "[", "{", "<")
+  closing_braces <- c(")", "]", "}", ">")
+  # vector for keeping track
+  open <- character(0)
+  
+  for(char in charvec){
+    #print(paste("start of loop, open is", paste0(open, collapse = " ")))
+    #print(char)
+    opening <- char %in% opening_braces
+    
+    if(any(opening)){
+      #print(paste(char, "is an opening bracket, adding to open"))
+      open <- c(open, char)
+    }else{
+      opposite <- reverseBracket(char)
+      last <- length(open)
+      if(opposite == open[last]){
+        #print(paste(char, "matches", open[last], "shortening open by 1"))
+        open <- open[1:(last - 1)]
+      }else{
+        #print(paste("incompatible char", char, "does not match", opposite))
+        return(char)
+      }
+    }
+  }
+  return(open)
+}
+
+remaining <- lapply(str_split(d_incomplete, ""), findIncomplete)
+
+closings <- lapply(remaining, function(x){
+  xvec <- rep(NA, length(x))
+  for (i in 1:length(x)) {
+    xvec[i] <- reverseBracket(x[i])
+  }
+  return(rev(xvec))
+})
+
+closings
+
+scoring <- function(charvec){
+  scores <- c(1, 2, 3, 4)
+  names(scores) <- c(")", "]", "}", ">")
+  result <- 0
+  for(char in charvec){
+    result <- result * 5 + scores[char]
+  }
+  return(result)
+}
+
+median(sapply(closings, scoring))
