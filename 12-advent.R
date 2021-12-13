@@ -2,7 +2,7 @@ library(stringr)
 library(dplyr)
 
 is.lwr <- function(string){
-  string == str_to_lower(string)
+  string == str_to_lower(string) | string == "end"
 }
 
 
@@ -40,21 +40,30 @@ for(path in ex_list[["start"]]){
   }
 }
 
-navigateCaves <- function(caves, room = "start", small_cave = FALSE){
+navigateCaves <- function(caves, room = "start", small_cave = FALSE, index = 1){
   print(paste("new room, room is:", room))
   if(room == "end") return(room)
   
-  results <- room
+
+  results <- list()
+  results[[index]] <- room
 
   
   for(path in caves[[room]]){
+    if(room == "start"){
+      index <- index + 1
+      small_cave <- FALSE
+    }
     print("new iteration")
-    if(!is.lwr(path) | !small_cave){
+    print(small_cave)
+    if(!is.lwr(path) | !small_cave | path == "end"){
       if(is.lwr(path)){
         print(paste("small cave", path, "visited, no more can be visited"))
         small_cave <- TRUE
       }
-      results <- c(results, navigateCaves(caves, room = path, small_cave = small_cave))
+      results[[index]] <- c(results, navigateCaves(caves, room = path, small_cave = small_cave, index = index))
+    }else{
+      print(paste("not entering cave", path))
     }
 
   }
